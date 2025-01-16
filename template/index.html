@@ -36,16 +36,16 @@
   <script type="text/babel" data-presets="env-plus,react">
     'use strict';
 
-    const privileges = new Set()
-    // 这里是每一个人对应的handlers
-    const handlers = [
+    const handlers = new Set()
+    // 这里是每一个人对应的handlers，可以通过接口获取
+    const allowHandlers = [
       'antd.Object.canClickLickButton'
     ]
     function privilege(target, name, descriptor) {
       const full_name = ['antd', target.constructor.name, name || target.key].join('.');
-      privileges.add(full_name); // 这个是用来配置权限用的
+      handlers.add(full_name); // 这个是用来配置权限用的
       (descriptor || target.descriptor).value = () => {
-        return handlers.filter(p => p == full_name).length > 0
+        return allowHandlers.filter(p => p == full_name).length > 0
       }
     }
 
@@ -68,11 +68,11 @@
 
         return (
           <div>
-            <p>handlers: {JSON.stringify(handlers)}</p>
-            <p>privileges: {JSON.stringify(Array.from(privileges.values()))}</p>
+            <p>allowHandlers: {JSON.stringify(allowHandlers)}</p>
+            <p>handlers: {JSON.stringify(Array.from(handlers.values()))}</p>
             <button disabled={!this.canClickLickButton()} onClick={() => this.setState({ liked: true })} > Like </button >
             <br />
-            <button disabled={!this.canClickUnLickButton} onClick={() => this.setState({ unliked: true })} > UnLike </button >
+            <button disabled={!this.canClickUnLickButton()} onClick={() => this.setState({ unliked: true })} > UnLike </button >
           </div>
         )
       }
