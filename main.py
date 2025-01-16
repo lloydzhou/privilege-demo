@@ -24,7 +24,6 @@ def authenticated(method):
         # 如果配置了特殊的权限，则需要当前用户有权限才能访问。
         # 这里可以使用privilege判断，其实也可以直接使用handlers判断
         allow_handlers = self.get_allow_handlers()
-        print()
         if isinstance(allow_handlers, set) and not fullname in allow_handlers:
             raise Exception('not allowed')
         return await method(self, *args, **kwargs)
