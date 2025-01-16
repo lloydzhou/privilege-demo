@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Tornado demo</title>
+</head>
+
+<body>
+
+  <h2>Tornado demo</h2>
+  <p>This page demonstrates using React with no build tooling.</p>
+  <p>React is loaded as a script tag.</p>
+
+  <!-- We will put our React component inside this div. -->
+  <div id="root"></div>
+
+  <!-- Load React. -->
+  <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    Babel.registerPreset("env-plus", {
+      presets: [
+        [Babel.availablePresets["env"], { "loose": true }]
+      ],
+      plugins: [
+        [
+          Babel.availablePlugins["proposal-decorators"], { decoratorsBeforeExport: true }
+        ]
+      ],
+    });
+  </script>
+  <script type="text/babel" data-presets="env-plus,react">
+    'use strict';
+
+    const privileges = new Set()
+    // 这里是每一个人对应的handlers
+    const handlers = [
+      'antd.Object.canClickLickButton'
+    ]
+    function privilege(target, name, descriptor) {
+      const full_name = ['antd', target.constructor.name, name || target.key].join('.');
+      privileges.add(full_name); // 这个是用来配置权限用的
+      (descriptor || target.descriptor).value = () => {
+        return handlers.filter(p => p == full_name).length > 0
+      }
+    }
+
+    class LikeButton extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { liked: false, unliked: false };
+      }
+
+      @privilege
+      canClickLickButton() {}
+
+      @privilege
+      canClickUnLickButton() {}
+
+      render() {
+        if (this.state.liked) {
+          return 'You liked this.';
+        }
+
+        return (
+          <div>
+            <p>handlers: {JSON.stringify(handlers)}</p>
+            <p>privileges: {JSON.stringify(Array.from(privileges.values()))}</p>
+            <button disabled={!this.canClickLickButton()} onClick={() => this.setState({ liked: true })} > Like </button >
+            <br />
+            <button disabled={!this.canClickUnLickButton} onClick={() => this.setState({ unliked: true })} > UnLike </button >
+          </div>
+        )
+      }
+    }
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+
+    root.render(<LikeButton />)
+  </script>
+</body>
+
+</html>
